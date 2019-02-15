@@ -13,11 +13,9 @@ int main(int argc, char *argv[])
 	int numchildren=1;
 	int n;
 	int b;
-	//for (b=0; b<argc; b++){
-	//		printf("%s\n", argv[b]);
-	//}
-	//printfn",);
-//	printf("this is proces %d\n", getpid());
+	int pauses=0;
+	int sleeps=0;
+	int sleeping=1;
 	while((opt = getopt(argc, argv, ":uM:N:ps:")) != -1){
         switch(opt){
 		case 'u': 
@@ -30,7 +28,9 @@ int main(int argc, char *argv[])
 				numlevels=n;
 			}else{
 				fprintf(stderr, "must enter a value within the range [1,4]");
+				return 0;
 			}
+			continue;
 		case 'M':
 			n=atoi(optarg);
 			if(n<=3){
@@ -38,11 +38,25 @@ int main(int argc, char *argv[])
 			}
 			else{
 				fprintf(stderr, "must enter a value within the range[1,3]");
+			
 			}
-    		
-		}
+			continue;
+    		case 'p':
+			pauses++;
+			//n=atoi()
+			continue;
+
+		case 's':
+			sleeping=atoi(optarg);
+			sleeps++;
+			continue;
+	}
 	}//end while
 	//processTree(numlevels,numchildren);
+	if (sleeps==1 && pauses==1){
+                fprintf(stderr, "prog2tree [-u] [-N <num-levels>] [-M <num-children>] [-p] [-s <sleep-time]");
+		return 0;
+	}
 	char numl[2];
 	 pid_t pid; /* for a child process */
 	int i;
@@ -69,33 +83,37 @@ int main(int argc, char *argv[])
 			args[2]="-M";
 			args[3]= child;
 			args[4]= NULL;
-                		//execv("./prog2tree", "-N", numl, "-M", child);
-			//execv("./prog2tree",  args);
 		        execlp("./prog2tree", "./prog2tree", "-N", numl, "-M", child, NULL);
-	
-			//printf("whats up");
         	}
-		//else{
-		//	for (int i=0; i<numchildren; i++){
-			//printf("this is the parent process: %d\n", getpid());		        
- 		//	wait(NULL);     
-		//	}
-		//	}
-    	}	 
-	if (numlevels>1){
-		for(int i = 0; i < numchildren; i++){
-			wait(NULL);
-            	}
+    	}
+	
+	if (pauses==1 && sleeps==0){
+		if (numlevels>1){
+			for (int i=0; i<numchildren;i++){
+				wait(NULL);
+			}
+		}
+		else{
+		pause();
+		}
 	}
-	else{
-		sleep(10);
-	}
-	sleep(10);
 
+	else if(pauses==0 ){
+		if (numlevels>1){
+                	for(int i = 0; i < numchildren; i++){
+                        	wait(NULL);
+                	}
+        	}
+        	else{
+                	sleep(sleeping);
+        	}
+
+	}
+	
 	//printf("EXITING")
         printf("EXITING: Level %d process with pid=%d, child of ppid=%d\n", numlevels, getpid(), getppid());
 	
 
     return 0;
-
+	
 }
