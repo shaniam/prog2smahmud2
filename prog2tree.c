@@ -1,17 +1,24 @@
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 //#include "processtree.h"
 #include <unistd.h>
+
+
 int main(int argc, char *argv[])
 {
 	int opt;
 	int numlevels=1;
 	int numchildren=1;
 	int n;
-	printf("hello\n");
-	
-	while((opt = getopt(argc, argv, ":uM:N:")) != -1){
+	int b;
+	//for (b=0; b<argc; b++){
+	//		printf("%s\n", argv[b]);
+	//}
+	//printfn",);
+//	printf("this is proces %d\n", getpid());
+	while((opt = getopt(argc, argv, ":uM:N:ps:")) != -1){
         switch(opt){
 		case 'u': 
 			fprintf(stderr, "prog2tree [-u] [-N <num-levels>] [-M <num-children>] [-p] [-s <sleep-time]");
@@ -41,44 +48,50 @@ int main(int argc, char *argv[])
 	int i;
 	int x;
 	char child[2];
+        printf("ALIVE: Level %d process with pid=%d, child of ppid=%d\n", numlevels, getpid(), getppid()); 
+
 	for(i=0;i<numchildren;i++) {
-		printf("ALIVE: Level %d process with pid=%d, child of ppid=%d\n", numlevels, getpid(), getppid()); 
+		//printf("ALIVE: Level %d process with pid=%d, child of ppid=%d\n", numlevels, getpid(), getppid()); 
 		if (numlevels==1){
 			break;}
 		pid=fork();
         	if (pid<0){
-			printf("failed fork\n");
+			perror("failed fork\n");
+			exit(1);
 		}
         	if(pid==0){
-                	//char num1[2];
-                	//levels--;
-			if(numlevels==4){
-				x=3;
-			}
-			else if (numlevels==3){
-				x=2;
-			}
-			else if(numlevels==2){
-					x=1;
-			}
-
-				//printf("hello");
-                		sprintf(numl ,"%d", x);
-				sprintf(child, "%d", numchildren);
-		               	//printf("%s",numl);
-				//printf("%s", child);
-				//execlp("./main", "./main", "-N", num1,"-M", children);
-                		execlp("./prog2tree", "./prog2tree", "-N", numl, "-M", child);
-				//printf("whats up");
-        	}
-		else{
-			for (int i=0; i<numchildren; i++){
-			 wait(NULL);     
-			}
-			}
-    	}	 
-
+			numlevels--;
+                	sprintf(numl ,"%d", numlevels);
+			sprintf(child, "%d", numchildren);
+			char* args[50];
+		       	args[0] = "-N";
+			args[1] = numl;
+			args[2]="-M";
+			args[3]= child;
+			args[4]= NULL;
+                		//execv("./prog2tree", "-N", numl, "-M", child);
+			//execv("./prog2tree",  args);
+		        execlp("./prog2tree", "./prog2tree", "-N", numl, "-M", child, NULL);
 	
+			//printf("whats up");
+        	}
+		//else{
+		//	for (int i=0; i<numchildren; i++){
+			//printf("this is the parent process: %d\n", getpid());		        
+ 		//	wait(NULL);     
+		//	}
+		//	}
+    	}	 
+	if (numlevels>1){
+		for(int i = 0; i < numchildren; i++){
+			wait(NULL);
+            	}
+	}
+	else{
+		sleep(10);
+	}
+	sleep(10);
+
 	//printf("EXITING")
         printf("EXITING: Level %d process with pid=%d, child of ppid=%d\n", numlevels, getpid(), getppid());
 	
